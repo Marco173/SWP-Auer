@@ -54,7 +54,7 @@ def checkfour():
 def main():
     generateCard(list_type, list_ranks)
     print((getFiveCards(list_PokerCards)))
-    #print(checkedRanks(getFiveCards(list_PokerCards), list_ranks))
+
 
 
 if __name__ == '__main__':
