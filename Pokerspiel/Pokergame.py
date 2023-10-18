@@ -10,8 +10,6 @@ checkedRanks = []
 dict_stat = []
 
 
-
-
 def generateCard(list_type, list_ranks):
     for type in list_type:
         for rank in list_ranks:
@@ -29,30 +27,35 @@ def getFiveCards(cards):  # get five random cards
 
     return cards[-5:]
 
+
 def checkedRanks(cards, ranks):
     amounts = []
     for rank in ranks:
-       amounts.append({'amount': len(list(filter(lambda card: card['ranks'] == ranks, cards))), 'rank': rank})
+        amounts.append({'amount': len(list(filter(lambda card: card['ranks'] == ranks, cards))), 'rank': rank})
     global checkedRanks
     checkedRanks = amounts
 
+
 def checkpair():
-    pairs = list(filter(lambda amount : amount['amount'] == 2, checkedRanks))
+    pairs = list(filter(lambda amount: amount['amount'] == 2, checkedRanks))
     return pairs
+
+
 def checkthree():
-    pairs = list(filter(lambda amount : amount['amount'] == 3, checkedRanks))
+    pairs = list(filter(lambda amount: amount['amount'] == 3, checkedRanks))
     return pairs
+
+
 def checkfour():
-    pairs = list(filter(lambda amount : amount['amount'] == 4, checkedRanks))
+    pairs = list(filter(lambda amount: amount['amount'] == 4, checkedRanks))
     return pairs
-
-
 
 
 def main():
-    generateCard(list_type,list_ranks)
+    generateCard(list_type, list_ranks)
     print((getFiveCards(list_PokerCards)))
-    print(filter_ranks(getFiveCards(list_PokerCards)))
+    #print(checkedRanks(getFiveCards(list_PokerCards), list_ranks))
+
 
 if __name__ == '__main__':
-  main()
+    main()
