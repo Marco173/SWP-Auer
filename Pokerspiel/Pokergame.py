@@ -1,61 +1,153 @@
 import random
-
-list_type = ['Kreuz', 'Herz', 'Pik', 'Karo']  # Kreuz,Herz,Pik,Karo
-list_ranks = ['Ace', 'King', 'Queen', 'Jack', 10, 9, 8, 7, 6, 5, 4, 3, 2]
+suits = ['clubs', 'hearts', 'spades', 'diamonds']  # Kreuz, Herz, Pik, Karo
+ranks = ['Ace', 'King', 'Queen', 'Jack', 10, 9, 8, 7, 6, 5, 4, 3, 2]
 outs = ['RoyalFlush', 'StraightFlush', 'FourOfAKind', 'FullHouse',
         'Flush', 'Straight', 'ThreeOfAKind', 'TwoPairs', 'Pair', 'HighCard']
-
-list_PokerCards = []
 checkedRanks = []
-dict_stat = []
 
 
-def generateCard(list_type, list_ranks):
-    for type in list_type:
-        for rank in list_ranks:
-            list_PokerCards.append({'TYPE': type, 'RANKS': rank})
+def generateCards(suits, ranks):
+    cards = []
 
-    random.shuffle(list_PokerCards)  # shuffles the filled card array
+    for suit in suits:
+        for rank in ranks:
+            cards.append({'suit': suit, 'rank': rank})
 
+    random.shuffle(cards)  # shuffle the filled cards array
+
+    return cards
 
 def getFiveCards(cards):  # get five random cards
-    count = 0
+    gezogen = 0
     for x in range(5):
-        place = random.randint(0, len(cards) - 1 - count)
-        count += 1
-        cards[place], cards[len(cards) - 1 - x] = cards[len(cards) - 1 - x], cards[place]
+        stelle = random.randint(0, len(cards)-1-gezogen)
+        gezogen += 1
+
+        cards[stelle], cards[len(
+            cards)-1-x] = cards[len(cards)-1-x], cards[stelle]
 
     return cards[-5:]
 
-
-def checkedRanks(cards, ranks):
+def checkRanks(cards, ranks):
     amounts = []
     for rank in ranks:
-        amounts.append({'amount': len(list(filter(lambda card: card['ranks'] == ranks, cards))), 'rank': rank})
+        amounts.append({'amount':
+                        len(list(filter(lambda card: card['rank'] == rank, cards))), 'rank': rank})
     global checkedRanks
     checkedRanks = amounts
 
+def checkPairs():
+    pairs = list(filter(lambda amount:  amount['amount'] == 2, checkedRanks))
+    return pairs  # return list of pairs, can be one or be two
 
-def checkpair():
-    pairs = list(filter(lambda amount: amount['amount'] == 2, checkedRanks))
-    return pairs
+def checkThree():
+    pairs = list(filter(lambda amount:  amount['amount'] == 3, checkedRanks))
+    return pairs  # return list of three
 
+def checkFour():
+    pairs = list(filter(lambda amount:  amount['amount'] == 4, checkedRanks))
+    return pairs  # return list of three
 
-def checkthree():
-    pairs = list(filter(lambda amount: amount['amount'] == 3, checkedRanks))
-    return pairs
+def checkConsecutive(l):
+    return sorted(l) == list(range(min(l), max(l)+1))
 
+def checkStraight(cards):
+    numbers = []
+    for card in cards:
+        if(card['rank'] == 'Ace'):
+            numbers.append(14)
+        elif(card['rank'] == 'King'):
+            numbers.append(13)
+        elif(card['rank'] == 'Queen'):
+            numbers.append(12)
+        elif(card['rank'] == 'Jack'):
+            numbers.append(11)
+        else:
+            numbers.append(card['rank'])
 
-def checkfour():
-    pairs = list(filter(lambda amount: amount['amount'] == 4, checkedRanks))
-    return pairs
+    return checkConsecutive(numbers)
 
+def getStraightSorted(cards):
+    numbers = []
+    for card in cards:
+        if(card['rank'] == 'Ace'):
+            numbers.append(14)
+        elif(card['rank'] == 'King'):
+            numbers.append(13)
+        elif(card['rank'] == 'Queen'):
+            numbers.append(12)
+        elif(card['rank'] == 'Jack'):
+            numbers.append(11)
+        else:
+            numbers.append(card['rank'])
+    return sorted(numbers)
 
-def main():
-    generateCard(list_type, list_ranks)
-    print((getFiveCards(list_PokerCards)))
+def checkFlush(cards, suits):
+    amounts = []
+    for suit in suits:
+        amounts.append({'amount':
+                        len(list(filter(lambda card: card['suit'] == suit, cards))), 'suit': suit})
+    pairs = list(filter(lambda amount:  amount['amount'] == 5, amounts))
 
+    # print(amounts)
+    return pairs  # return list of three
 
+def checkFullHouse(cards, ranks):
+    isThree = len(checkThree()) == 1 if True else False
+    isTwo = len(checkPairs()) == 1 if True else False
 
-if __name__ == '__main__':
-    main()
+    return isThree and isTwo
+
+def checkStraightFlush(cards, suits):
+    isStraight = checkStraight(cards)
+    isFlush = len(checkFlush(cards, suits)) == 1 if True else False
+
+    return isStraight and isFlush
+
+def checkRoyalFlush(cards, suits):
+    if(checkStraightFlush(cards, suits)):
+        return getStraightSorted(cards) == list(range(10, 14+1))
+
+    return False
+
+def checkMyCards(cards, ranks, suits):
+    checkRanks(cards, ranks)
+    if(checkRoyalFlush(cards, suits)):
+        return 'RoyalFlush'
+    if(checkStraightFlush(cards, suits)):
+        return 'StraightFlush'
+    if(len(checkFour()) == 1):
+        return 'FourOfAKind'
+    if(checkFullHouse(cards, ranks)):
+        return 'FullHouse'
+    if(checkFlush(cards, suits)):
+        return 'Flush'
+    if(checkStraight(cards)):
+        return 'Straight'
+    if(checkThree()):
+        return 'ThreeOfAKind'
+    if(len(checkPairs()) == 2):
+        return 'TwoPairs'
+    if(len(checkPairs()) == 1):
+        return 'Pair'
+    else:
+        return 'HighCard'
+
+def makeStats(ranks, suits, many):
+    myDict = dict()
+    myDictPro = dict()
+
+    for i in outs:
+        myDict[i] = 0
+    for x in range(0, many):
+        cards = getFiveCards(generateCards(suits, ranks))
+        myDict[checkMyCards(cards, ranks, suits)] += 1
+        print(x)
+    for key in myDict:
+        myDictPro[key] = round((myDict[key]/many)*100,2)
+
+    print(myDictPro)
+    print(myDict)
+
+if __name__ == "__main__":
+    makeStats(ranks, suits, 1000000)
