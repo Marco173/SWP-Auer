@@ -23,16 +23,23 @@ def getFiveCards(cards):  # get five random cards
         stelle = random.randint(0, len(cards)-1-gezogen)
         gezogen += 1
 
-        cards[stelle], cards[len(
-            cards)-1-x] = cards[len(cards)-1-x], cards[stelle]
+        cards[stelle], cards[len(cards)-1-x] = cards[len(cards)-1-x], cards[stelle]
 
     return cards[-5:]
 
+#chat gpt
+#
 def checkRanks(cards, ranks):
     amounts = []
-    for rank in ranks:
+    for rank in ranks: # Die Methode itertier über jeden Kartenrang in der Liste rnaks
         amounts.append({'amount':
                         len(list(filter(lambda card: card['rank'] == rank, cards))), 'rank': rank})
+        #filter: es filtert die karten in cards die den akutellen rang haben
+        #len zählt die anzahl der karten die den aktuellen Rang entsprechen
+        # ein dictionary wird estellt, das die Anzahl der karten amount und den Rang ranks speichert
+        # diese wid in der lsite amounts hinzugefügt
+        #amounts wird in die globale varialb checkedranks hinzugefügt
+
     global checkedRanks
     checkedRanks = amounts
 
@@ -144,10 +151,10 @@ def makeStats(ranks, suits, many):
         myDict[checkMyCards(cards, ranks, suits)] += 1
         print(x)
     for key in myDict:
-        myDictPro[key] = round((myDict[key]/many)*100,2)
+        myDictPro[key] = round((myDict[key]/many)*100,7)
 
     print(myDictPro)
     print(myDict)
 
 if __name__ == "__main__":
-    makeStats(ranks, suits, 1000000)
+    makeStats(ranks, suits, 100000)
