@@ -28,10 +28,9 @@ def getFiveCards(cards):  # get five random cards
     return cards[-5:]
 
 #chat gpt
-#
 def checkRanks(cards, ranks):
     amounts = []
-    for rank in ranks: # Die Methode itertier über jeden Kartenrang in der Liste rnaks
+    for rank in ranks: # Die Methode itertiert über jeden Kartenrang in der Liste ranks
         amounts.append({'amount':
                         len(list(filter(lambda card: card['rank'] == rank, cards))), 'rank': rank})
         #filter: es filtert die karten in cards die den akutellen rang haben
@@ -43,7 +42,7 @@ def checkRanks(cards, ranks):
     global checkedRanks
     checkedRanks = amounts
 
-def checkPairs():
+def checkPairs(cards):
     pairs = list(filter(lambda amount:  amount['amount'] == 2, checkedRanks))
     return pairs  # return list of pairs, can be one or be two
 
@@ -133,7 +132,7 @@ def checkMyCards(cards, ranks, suits):
         return 'Straight'
     if(checkThree()):
         return 'ThreeOfAKind'
-    if(len(checkPairs()) == 2):
+    if(len(checkPairs(cards)) == 2):
         return 'TwoPairs'
     if(len(checkPairs()) == 1):
         return 'Pair'
@@ -157,4 +156,6 @@ def makeStats(ranks, suits, many):
     print(myDict)
 
 if __name__ == "__main__":
-    makeStats(ranks, suits, 100000)
+    print(generateCards(suits,ranks))
+
+    #makeStats(ranks, suits, 1000000)
