@@ -46,11 +46,11 @@ class Game:
         if len(args) == 2:
             self.player1 = Player("Computer")
             self.player2 = args[0]
-            self.pointsToWin = args[1]
+            self.pointsToWin = 5
         else:
             self.player1 = args[0]
             self.player2 = args[1]
-            self.pointsToWin = args[2]
+            self.pointsToWin = 5
 
         Stein = Hand("stein")
         Papier = Hand("papier")
@@ -59,8 +59,8 @@ class Game:
         Spock = Hand("spock")
         self.hands = [Stein, Papier, Schere, Echse, Spock]
 
-        self.stats = {'rock': 0, 'paper': 0,
-                      'scissors': 0, 'lizzard': 0, 'spock': 0}
+        self.stats = {'stein': 0, 'papier': 0,
+                      'schere': 0, 'echse': 0, 'spock': 0}
 
         self.player1Wins = 0
         self.player2Wins = 0
@@ -82,8 +82,10 @@ class Game:
             self.playOneRound(hand1, hand2)
         if self.player1Wins > self.player2Wins:
             print(self.player1.name + "gewinnt!")
+            print(self.stats)
         else:
             print(self.player2.name + "gewinnt!")
+            print(self.stats)
 
     def playOneRound(self, hand1, hand2):
         self.player1.hand = hand1
@@ -95,6 +97,7 @@ class Game:
         elif self.player2.isBeatenBy(self.player1):
             self.player1Wins += 1
             print(self.player1.name + " wins this round!")
+
         else:
             print("This round is a tie!")
 
@@ -105,16 +108,17 @@ class Game:
         self.player2.hand = random.choice(self.hands)
         self.player2.hand = Hand(self.playComputer())
         self.rounds += 1
+
         if self.player1.isBeatenBy(self.player2):
-            self.player2Wins += 1
-            return self.player2.name + " wins this round!"
+                self.player2Wins += 1
+                return self.player2.name + " wins this round!"
         elif self.player2.isBeatenBy(self.player1):
-            self.player1Wins += 1
-            return self.player1.name + " wins this round!"
-            print(self.stats)
+                self.player1Wins += 1
+                return self.player1.name + " wins this round!"
+                print(self.stats)
         else:
-            return "This round is a tie!"
-            print(self.stats)
+                return "This round is a tie!"
+                print(self.stats)
 
 
     def playComputer(self):
@@ -138,6 +142,7 @@ if __name__ == "__main__":
 
     game = Game(player_me, 2)
     game.play()
+
 
 
 
