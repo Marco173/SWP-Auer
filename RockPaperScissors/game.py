@@ -101,26 +101,6 @@ class Game:
         else:
             print("This round is a tie!")
 
-
-    def returnOneRound(self, hand1String):
-        self.stats[hand1String] += 1
-        self.player1.hand = Hand(hand1String)
-        self.player2.hand = random.choice(self.hands)
-        self.player2.hand = Hand(self.playComputer())
-        self.rounds += 1
-
-        if self.player1.isBeatenBy(self.player2):
-                self.player2Wins += 1
-                return self.player2.name + " wins this round!"
-        elif self.player2.isBeatenBy(self.player1):
-                self.player1Wins += 1
-                return self.player1.name + " wins this round!"
-                print(self.stats)
-        else:
-                return "This round is a tie!"
-                print(self.stats)
-
-
     def playComputer(self):
         print(self.data)
         print(self.data['rock'])

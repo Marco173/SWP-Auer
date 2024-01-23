@@ -23,6 +23,8 @@ class TestPoker(unittest.TestCase):
             five_cards = getFiveCards(cards)
             self.assertEqual(len(five_cards), 5)
 
+      
+
         # Add more tests for the remaining functions
 
 
