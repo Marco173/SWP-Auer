@@ -21,4 +21,4 @@ for e in range(1000):
         statistic_dic[i] += 1
 
 
-print(statistic_dic)
+print(statistic_dic) 
