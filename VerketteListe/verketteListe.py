@@ -1,181 +1,90 @@
-import random as rd
-import copy
-import time
+from collections.abc import Iterator
+import  random
 
+class LinkedList(Iterator):
+    def __init__(self):
+        self.head = None
 
-class ListElement:
-    def __init__(self, obj):
-        self.obj = obj
-        # Beim erzeugen ist das nächste Element none und wird erst im nächsten Ablauf definiert
-        self.next = None
-
-    def __str__(self):
-        return str(self.obj)
-
-
-class VerketteteListe:
-    def __init__(self, *args):
-        self.first = None
-
-    def __str__(self):
-        if self.first == None:
-            return "[]"
+    def append(self, value):
+        if self.head is None:
+            self.head = Node(value)
         else:
-            current = self.first
-            result = "["
-            while current.next != None:
-                result += str(current.obj) + ", "
-                current = current.next
-            result += str(current.obj) + "]"
-            return result
+            node = self.head
+            while node.next is not None:
+                node = node.next
+            node.next = Node(value)
 
-    def getLength(self):
-        if self.first == None:
-            return 0
-        else:
-            current = self.first
-            length = 1
-            while current.next != None:
-                length += 1
-                current = current.next
-            return length
-
-    def append(self, newObject):
-        new = ListElement(newObject)
-        if self.first == None:
-            self.first = new
-        else:
-            self.getLast().next = new
-
-    def getLast(self):
-        return self.getElementByIndex(self.getLength()-1)
-
-    def findObjIndex(self, obj):
-        if self.first == None:
-            return None
-        else:
-            current = self.first
-            index = 0
-            while current.next != None:
-                if current.obj == obj:
-                    return {"cur": current, "i": index}
-                current = current.next
-                index += 1
-            if current.obj == obj:
-                return {"cur": current, "i": index}
-            else:
-                return None
-
-    def findObj(self, obj):
-        # Wenn das Objekt nicht gefunden wurde, wird None zurückgegeben
-        return self.findObjIndex(obj)["cur"] if self.findObjIndex(obj) != None else None
-
-    def clear(self):
-        self.first = None
-
-    def extend(self, *args):
-        for arg in args:
-            self.append(arg)
-
-    def index(self, obj):
-        # Wenn das Objekt nicht gefunden wurde, wird None zurückgegeben
-        return self.findObjIndex(obj)["i"] if self.findObjIndex(obj) != None else None
+    def insert_at(self, position, value):
+        raise NotImplemented
 
     def pop(self):
-        # Das vorletzte Element referenziert auf kein anderes mehr
-        elem = self.getElementByIndex(self.getLength()-2)
-        elem.next = None
+        if self.head.next is None:
+            raise Exception
 
-    def reverse(self):
-        newList = VerketteteListe()
-        listcopy = copy.deepcopy(self)
-        while listcopy.getLength() > 1 and listcopy.getLast() != None:
-            newList.append(listcopy.getLast())
-            listcopy.pop()
-        newList.append(listcopy.first)
-        return newList
+        p_node = None
+        node = self.head
+        while node.next is not None:
+            p_node = node
+            node = node.next
+        p_node.next = None
+        return node.value
 
-    def getElementByIndex(self, index):
-        if index >= self.getLength():
-            raise IndexError("Index out of range")
+    def remove_at(self, position):
+        index = 0
+        prev_node = None
+        node = self.head
+        while index != position:
+            if node.next is None:
+                raise Exception
+
+            index += 1
+            node = node.next
+        prev_node.next = node.next
+
+    def __next__(self):
+        if self.head is None:
+            raise StopIteration
         else:
-            i = 0
-            current = self.first
-            while current.next != None and i < index:
-                current = current.next
-                i += 1
-            return current
+            value = self.head.value
+            self.head = self.head.next
+            return value
 
-    def delete(self, index):
-        # Man will das Element vor dem zu löschenden Element
-        elem = self.getElementByIndex(index-1)
+    def __len__(self):
+        length = 1
+        node = self.head
+        while node.next is not None:
+            node = node.next
+            length += 1
+        return length
 
-        if index == 0:
-            self.first = self.first.next
-            return
-        # Wenn elem.next.next = None, dann wird elem.next = None, sprich nach dem element gibt es kein anderes mehr
-        elem.next = elem.next.next
+    def __str__(self):
+        node = self.head
+        string = f"{node.value}"
+        while node.next is not None:
+            node = node.next
+            string += f" -> {node.value}"
+        return string
 
-    def getSmallest(self):
-        current = self.first
-        smallest = current
-        for i in range(self.getLength()):
-            if current.obj < smallest.obj:
-                smallest = current
-            current = current.next
-        return smallest
 
-    def sort(self):
-        list2 = VerketteteListe()
-        listC = copy.deepcopy(self)
-        while listC.getLength() > 0:
-            smallest = listC.getSmallest()
-            list2.append(smallest.obj)
-            listC.delete(listC.index(smallest.obj))
-
-        return list2
-
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
 def main():
-    # create a new list
-    list = VerketteteListe()
-    # add some elements
-    list.append(rd.randint(0, 100))
-    list.append(rd.randint(0, 100))
-    list.append(rd.randint(0, 100))
-    list.append(rd.randint(0, 100))
-    list.append(rd.randint(0, 100))
-    # print the list
-    print(
-        f"Befuellte Liste (Zufallszahlen): {list} mit der Laenge {list.getLength()}")
-    print(f"Gibt es das Element 100 in der Liste? {list.findObj(100)}")
-    print(f"Die Liste wird gelöscht !")
-    # list.clear()
-    print(f"Die Liste ist jetzt leer: {list}")
-    print(f"Die Liste wird mit 10 Elementen befuellt !")
-    list.extend(1, 2, 10,  3, 4, 5, 6, 7, 8, 9, 10)
-    print(f"Die Liste ist jetzt befuellt: {list}")
+    #Erstellen der Liste
+    liste = LinkedList()
+    #Hinzufügen von Zahlen in die Liste
+    for i in (random.randint(0, 100) for _ in range(10)):
+        liste.append(i)
 
-    print(f"Gib den Index des Objekts 10 zurück: {list.index(10)}")
+    print(liste)
+    print(f"length: {len(liste)}")
 
-    print(
-        f"Das letzte Element der Liste ist {list.getLast()} Nun wird es gelöscht !")
-    list.pop()
-    print(f"Das letzte Element der Liste ist {list.getLast()}")
-    print(f"Die Liste wird umgedreht !")
-    list2 = list.reverse()
-    print(
-        f"Die Liste ist jetzt umgedreht: {list2} und die alte Liste ist {list}")
-    print(f"Das Element am Index 8 wird gelöscht !")
-    print(list)
-    list.delete(0)
-    print(list)
-    print(f"Das Element am Index 8 ist jetzt {list.getElementByIndex(8)}")
-    print(f"Die neue Liste ist {list}")
+    print("List:")
+    for element in liste:
+        print(element)
 
-    sorted = list.sort()
-    print(sorted)
 
-# define main
 if __name__ == "__main__":
     main()

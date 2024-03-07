@@ -159,3 +159,15 @@ if __name__ == "__main__":
     print(generateCards(suits,ranks))
 
     #makeStats(ranks, suits, 1000000)
+
+"""def my_decorator(func):
+    print("HALLO")
+
+    def wrapper(dic1, turns):
+        print("Wrapper")
+        zeitanfang = time.time()
+        print(func(dic1,turns))
+        zeitende = time.time()
+        print(f"Dauer Programmausführung:{zeitende - zeitanfang}")
+    return wrapper'    
+"""

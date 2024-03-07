@@ -1,100 +1,45 @@
-# Declarative-Variante wird hier benutzt
-from dataclasses import dataclass
-from flask import Flask, jsonify, render_template, request
-from sqlalchemy import Column, Integer, Text
-from sqlalchemy import create_engine, or_
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.expression import func
+from flask import Flask, request
+import sqlite3
 
-import os
-from flask_restful import Resource, Api
-
-Base = declarative_base()  # Basisklasse aller in SQLAlchemy verwendeten Klassen
-metadata = Base.metadata
-
-# Welche Datenbank wird verwendet
-engine = create_engine('sqlite:///database.db', echo=True)
-db_session = scoped_session(sessionmaker(
-    autocommit=False, autoflush=False, bind=engine))
-Base.query = db_session.query_property()
-app = Flask(__name__)  # Die Flask-Anwendung
-api = Api(app)  # Die Flask API
+app = Flask(__name__)
 
 
-@dataclass
-class Statistics(Base):
-    __tablename__ = 'statistics'  # Abbildung auf diese Tabelle
+def setup_db():
+    connection = sqlite3.connect('SchereSteinPapier.db')
+    cursor = connection.cursor()
 
-    id = Column(Integer, primary_key=True)
-    playername = Column(Text)
-    rock = Column(Text)
-    paper = Column(Text)
-    scissors = Column(Text)
-    lizzard = Column(Text)
-    spock = Column(Text)
-
-    def serialize(self):
-        return {'id': self.id,
-                'playername': self.playername,
-                'rock': self.rock, 'paper': self.paper, 'scissors': self.scissors, 'lizzard': self.lizzard,
-                'spock': self.spock}
+    query = """CREATE TABLE IF NOT EXISTS stats (
+    Eintrags_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    winner TEXT NOT NULL,
+    winnerSymbol TEXT
+    )
+    """
+    cursor.execute(query)
 
 
-# when / is called the statistics are returned
+def save_stats(stats):
+    connection = sqlite3.connect('database  .db')
+    cursor = connection.cursor()
 
+    # save data to db
+    query = insert_query = """
+       INSERT INTO stats (winner, winnerSymbol)
+       VALUES ('{}','{}')
+       """.format(stats['winner'], stats['winnerSymbol'])
 
-@app.route('/')
-def index():
-    return jsonify([e.serialize() for e in Statistics.query.all()])
+    print("executing: ", query)
+    cursor.execute(query)
+    connection.commit()
 
-
-class StatisticsClass(Resource):
-    def get(self, playername):
-        print(playername)
-        player = Statistics.query.filter(
-            Statistics.playername == playername).first()
-        if player:
-            return jsonify(player.serialize())
-        else:
-            return {"Message": "Nicht gefunden"}
-
-    def put(self, playername):
-        # check if the playername already exists
-        data = request.get_json()
-        rock = data['rock']
-        paper = data['paper']
-        scissors = data['scissors']
-        lizzard = data['lizzard']
-        spock = data['spock']
-
-        existing = Statistics.query.filter(
-            Statistics.playername == playername).first()
-        if existing:
-            existing.rock = rock
-            existing.paper = paper
-            existing.scissors = scissors
-            existing.lizzard = lizzard
-            existing.spock = spock
-            db_session.commit()
-
-            return {"Message": "Überschrieben"}
-        else:
-            # get data from the request
-            print(data)
-
-            new = Statistics(playername=playername, rock=rock, paper=paper,
-                             scissors=scissors, lizzard=lizzard, spock=spock)
-            db_session.add(new)
-            db_session.commit()
-            return {"Message": "Neu hinzugefügt"}
-
-    def delete(self):
-        return {'param1': 'HELLO',
-                'param2': 13}
-
-
-api.add_resource(StatisticsClass, '/<string:playername>')
+@app.route('/stats', methods=['POST'])
+def post_statistics():
+    if request.is_json:
+        print(request.json)
+        save_stats(request.json)
+        return 'Daten erfolgreich eingelesen'
+    else:
+        return 'Fehler beim Speichern der Daten'
 
 if __name__ == '__main__':
+    setup_db()
     app.run(debug=True)

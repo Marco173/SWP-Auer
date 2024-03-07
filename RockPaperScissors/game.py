@@ -1,128 +1,95 @@
-import random
+from Spieler import Player
+from Computer import Computer
 import requests
 import json
 
-
-class Hand:
-    def __init__(self, hand):
-        self.hand = hand
-        self.fillWhoCanBeatMe()
-
-    def __str__(self):
-        return self.hand
-
-    def fillWhoCanBeatMe(self):
-        if self.hand == "stein":
-            self.whoCanBeatMe = ["papier", "spock"]
-        elif self.hand == "papier":
-            self.whoCanBeatMe = ["schere", "echse"]
-        elif self.hand == "schere":
-            self.whoCanBeatMe = ["stein", "spock"]
-        elif self.hand == "echse":
-            self.whoCanBeatMe = ["stein", "schere"]
-        elif self.hand == "spock":
-            self.whoCanBeatMe = ["papier", "echse"]
-
-    def isBeatenBy(self, otherHand):
-        return otherHand.hand in self.whoCanBeatMe
-
-
-class Player:
-    def __init__(self, name):
-        self.name = name
-        self.hand = None
-
-    def __str__(self):
-        return self.name
-
-    def isBeatenBy(self, otherPlayer):
-        return self.hand.isBeatenBy(otherPlayer.hand)
-
-
-
-class Game:
-
-    def __init__(self, *args):
-        if len(args) == 2:
-            self.player1 = Player("Computer")
-            self.player2 = args[0]
-            self.pointsToWin = 5
-        else:
-            self.player1 = args[0]
-            self.player2 = args[1]
-            self.pointsToWin = 5
-
-        Stein = Hand("stein")
-        Papier = Hand("papier")
-        Schere = Hand("schere")
-        Echse = Hand("echse")
-        Spock = Hand("spock")
-        self.hands = [Stein, Papier, Schere, Echse, Spock]
-
-        self.stats = {'stein': 0, 'papier': 0,
-                      'schere': 0, 'echse': 0, 'spock': 0}
-
-        self.player1Wins = 0
-        self.player2Wins = 0
-        self.rounds = 0
-        self.chosenHands = {}
-        for hand in self.hands:
-            self.chosenHands[hand.hand] = 0
+url='http://127.0.0.1:5000/'
+def game():
+    options = {1: 'Rock', 2: 'Paper', 3: 'Scissors', 4: 'Spock', 5: 'Lizard'}
+    game=True
+    data_dic = get_data()
+    p=Player(input("Name:"))
+    if input("Statistik(S)/Play(P)")=="S":
+        print(data_dic)
+    c=Computer()
+    while game:
+        option= p.option()
+        option2=c.option()
+        winner=check_inputs(option,option2)
+        if winner==1:
+            print(f"{p.name} hat gewonnen mit {options[option]}")
+            print(f"Computer {options[option2]}")
+            data_dic["Player"]=data_dic["Player"]+1
+            data_dic[options[option]]=data_dic[options[option]]+1
+            export_data(data_dic)
+            #Erzeugen eines dics für DB
+            stats={"winner":"Player","winnerSymbol":options[option]}
+            export_data2(stats)
+        elif winner==2:
+            print(f"{c.name} hat gewonnen mit {options[option2]}")
+            print(f"{p.name}: {options[option]}")
+            data_dic["Computer"] = data_dic["Computer"] + 1
+            data_dic[options[option]] = data_dic[options[option]] + 1
+            export_data(data_dic)
+            # Erzeugen eines dics für DB
+            stats = {"winner":"Computer", "winnerSymbol": options[option2]}
+            export_data2(stats)
+        elif winner==0:
+            print("Draw")
+            data_dic["Draw"] = data_dic["Draw"] + 1
+            data_dic[options[option]] = data_dic[options[option]] + 1
+            export_data(data_dic)
+            # Erzeugen eines dics für DB
+            stats = {"winner": "Draw", "winnerSymbol":"null"}
+            export_data2(stats)
+        con=input("Continue:Y/N")
+        if con == "N" or c=="n":
+            game= False
+        elif c == "Y" or c== "y":
+            game= True
 
 
-    def play(self):
-        while self.player1Wins < self.pointsToWin and self.player2Wins < self.pointsToWin:
-            if self.player1.name == "Computer":
-                hand1 = random.choice(self.hands)
-            else:
-                hand1 = Hand(input("Player1, bitte ihre Wahl angeben:"))
+def check_inputs(option1,option2):
+    regeln = {
+        1: [4, 3],  # Schere schlägt "Echse", "Papier"
+        2: [4, 1],  # Stein schlägt "Echse", "Schere"
+        3: [2, 5],  # Papier schlägt "Stein", "Spock"
+        4: [3, 5],  # Echse schlägt "Papier", "Spock"
+        5: [2, 1]  # Spock schlägt "Stein", "Schere"
+    }
 
-            hand2 = Hand(input("Player2,bitte ihre Wahl angeben:"))
-            self.chosenHands[hand2.hand] += 1
-            self.playOneRound(hand1, hand2)
-        if self.player1Wins > self.player2Wins:
-            print(self.player1.name + "gewinnt!")
-            print(self.stats)
-        else:
-            print(self.player2.name + "gewinnt!")
-            print(self.stats)
+    if option1 == option2:
+       return 0
+    elif option1 not in regeln[option2]:
+        return 2
+    else:
+        return 1
+    return 99
 
-    def playOneRound(self, hand1, hand2):
-        self.player1.hand = hand1
-        self.player2.hand = hand2
-        self.rounds += 1
-        if self.player1.isBeatenBy(self.player2):
-            self.player2Wins += 1
-            print(self.player2.name + " wins this round!")
-        elif self.player2.isBeatenBy(self.player1):
-            self.player1Wins += 1
-            print(self.player1.name + " wins this round!")
-
-        else:
-            print("This round is a tie!")
-
-    def playComputer(self):
-        print(self.data)
-        print(self.data['rock'])
-        print(self.data['paper'])
-        print(self.data['scissors'])
-        print(self.data['lizzard'])
-        print(self.data['spock'])
-        return random.choices(
-            population=['rock', 'paper', 'scissors', 'lizzard', 'spock'],
-            weights=[self.data['rock'], self.data['paper'],
-                     self.data['scissors'], self.data['lizzard'], self.data['spock']],
-            k=1)[0]
+    '''
+    if option1 == option2:
+        return 0
+    elif ((option2 - option1) % 5) % 2 == 0:
+        return 1
+    return 2
+    '''
 
 
-if __name__ == "__main__":
+def export_data(data):
+    with open('Data.json', 'w') as datei:
+        json.dump(data, datei, indent=2, ensure_ascii=False)
 
-    player_comp = Player("You")
-    player_me = Player("Me")
+def export_data2(stats):
+    res = requests.post(url+'/stats', json=stats)
+    print(res.text)
 
-    game = Game(player_me, 2)
-    game.play()
+def get_data():
+    with open('Data.json', 'r') as datei:
+        daten = json.load(datei)
+        return daten
 
+def main():
+    game()
 
-
-
+if __name__ =="__main__":
+    main()
